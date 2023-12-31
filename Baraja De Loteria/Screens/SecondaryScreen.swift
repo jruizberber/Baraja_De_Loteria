@@ -90,6 +90,7 @@ struct SecondaryScreen: View {
                         }
                         
                         //Test
+                        //Test2
                     }
                     //startDealing()
                     else if(pauseButtonOn){
