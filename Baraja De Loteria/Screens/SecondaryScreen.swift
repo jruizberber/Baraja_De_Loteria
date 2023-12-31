@@ -89,6 +89,7 @@ struct SecondaryScreen: View {
                             }
                         }
                         
+                        //Test
                     }
                     //startDealing()
                     else if(pauseButtonOn){
