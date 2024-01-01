@@ -7,11 +7,10 @@
 
 import SwiftUI
 
-
 struct SecondaryScreen: View {
     
     @State var currentCard: String = "Card_Back"
-    @State var pauseButtonOn: Bool = false
+    @State var dealingPaused: Bool = false
     @State var dealingDeck = false;
     
     // Instantiate array of card names
@@ -20,8 +19,10 @@ struct SecondaryScreen: View {
         for i in 1...54{
             array.append("Loteria_Card_\(i)")
         }
-        return array
+        return array.shuffled()
     }()
+    
+    @State private var cardsPlayed = [String]()
 
     // Timer Variable
     @State private var currentDate = Date.now
@@ -54,64 +55,61 @@ struct SecondaryScreen: View {
             VStack{
                 ZStack{
                     // Background Card Back
-                    Image("Card_Back")
-                        .resizable()
-                        .scaledToFit()
-                        //.ignoresSafeArea()
-                        .frame(width: UIScreen.main.bounds.width * 0.8)
-                        .shadow(color: .black, radius: 2, x:-1, y:-1)
+                    
+                    ForEach(0..<cardsPlayed.count, id: \.self){
+                        index in
+                            Image(cardsPlayed[index])
+                                .resizable()
+                                .scaledToFit()
+                                //.ignoresSafeArea()
+                                .frame(width: UIScreen.main.bounds.width * 0.8)
+                                .shadow(color: .black, radius: 2, x:-1, y:-1)
+//                                .stacked(at: index, in: .cardsPlayed.count)
+                                .offset(x: 0, y: Double(index * 2))
+                    }
+                    
+//                    Image("Card_Back")
+//                        .resizable()
+//                        .scaledToFit()
+//                        //.ignoresSafeArea()
+//                        .frame(width: UIScreen.main.bounds.width * 0.8)
+//                        .shadow(color: .black, radius: 2, x:-1, y:-1)
                     
                     //let _ = print("printing..")
-                    
-                    // Second Card
-                    Image(currentCard)
-                        .resizable()
-                        .scaledToFit()
-                        //.ignoresSafeArea()
-                        .frame(width: UIScreen.main.bounds.width * 0.8)
-                        .shadow(color: .black, radius: 2, x:0, y:0)
-                        .offset(x:3, y: 3)
-                        //.animation(.easeInOut(duration: 3).delay(1), value: currentCard)
                 }
                 
-                // Play/Pause Button
-                Button(action: {
-                    pauseButtonOn.toggle()
-
-                    if(dealingDeck == false){
-                        // Deal Deck
-                        dealingDeck.toggle()
-                        print("Started Dealing Cards")
-                        cards.shuffle()
-                        for (i, card) in cards.enumerated(){
-                            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i-1) * 3){
-                                currentCard = card
+                Spacer()
+                
+                if !dealingDeck{
+                    Button(action: {
+                        dealingDeck = true
+                        
+                        if dealingPaused{
+                            //Resume dealing
+                            dealingPaused = false
+                        }
+                        for i in 1...54{
+                            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i-1) * 0.25){
+                                cardsPlayed.append(cards.removeLast())
                             }
                         }
                         
-                        //Test
-                        //Test2
-                        //Test3
-                    }
-                    //startDealing()
-                    else if(pauseButtonOn){
-                        //Game Paused by User
-                        // TODO - Implement pause code
-                        
-                    }
-                    
-                    // If Paused Button
-                }, label: {
-                    // Play and Pause Labels
-                    if pauseButtonOn {
-                        PauseButton()
-                        let _ = print("pause button view toggled")
-                    }
-                    else{
+                    }, label: {
                         PlayButton()
-                        let _ = print("play button view toggled")
-                    }
-                })
+                    })
+                }else{
+                    Button(action: {
+                        dealingDeck = false
+                        dealingPaused = true
+                        
+                    }, label: {
+                        PauseButton()
+                    })
+                }
+                
+                
+                
+                
             }
         }
     }
